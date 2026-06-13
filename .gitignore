@@ -1,0 +1,39 @@
+# Python virtual env (managed by uv — recreate with `uv sync`)
+.venv/
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Jupyter
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# Env / secrets
+.env
+.env.local
+
+# ML artifacts
+*.ckpt
+*.pt
+*.pth
+*.h5
+*.keras
+*.onnx
+*.safetensors
+data/
+datasets/
+checkpoints/
+runs/
+wandb/
+mlruns/
+outputs/
+*.log
+
+# HF / model caches (keep local, not in repo)
+.cache/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
