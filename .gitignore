@@ -37,3 +37,8 @@ outputs/
 .idea/
 .vscode/
 *.swp
+
+# Books / copyrighted PDFs — we LEARN from these locally but never distribute them
+*.pdf
+books-to-read/
+books/

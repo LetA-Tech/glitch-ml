@@ -1,8 +1,24 @@
 # glitch-ml
 
-A machine learning / AI project. Environment is managed with [**uv**](https://docs.astral.sh/uv/) on **Python 3.12**, with the full scientific, deep-learning, and LLM tooling stack installed.
+A deep, hands-on journey into **AI, Machine Learning, and Data Engineering** — anchored on the
+*Grokking* book series and built around a real capstone (a **real-time fraud / anomaly detection**
+system) and a real product lens (**Mellions**, a Personal Financial Management app).
+
+The repo holds two things side by side:
+- **`curriculum/`** — structured learning: chapter notebooks, flashcards, test questions, interview prep, and scorecards.
+- **`src/` + `capstone/`** — runnable code: from-scratch implementations and the capstone that grows one component per chapter.
+
+Environment is managed with [**uv**](https://docs.astral.sh/uv/) on **Python 3.12**, with the full scientific, deep-learning, and LLM tooling stack installed.
 
 > New here? Follow the step-by-step [**SETUP.md**](./SETUP.md) to get a working environment in a few minutes.
+> Start with [`curriculum/roadmap.md`](./curriculum/roadmap.md) for the full learning plan.
+
+## How the learning works (per chapter)
+
+Read → understand core concepts → deep dive (intuition, math, when/why, mistakes, real systems) →
+notebook → Test 1 (knowledge) → Test 2 (coding) → capstone component → interview translation →
+scorecard. Every concept is taught in **three layers**: interview readiness, real technical mastery,
+and product application (Mellions). See [`curriculum/product_context_mellions.md`](./curriculum/product_context_mellions.md).
 
 ## Stack
 
@@ -72,14 +88,27 @@ load_dotenv()  # reads .env → os.environ
 
 ```
 glitch-ml/
-├── src/                  # source code
+├── curriculum/                     # the learning track (docs)
+│   ├── roadmap.md                  # full plan: chapters → concepts → capstone
+│   ├── product_context_mellions.md # Mellions product lens + 3 learning layers
+│   ├── notebooks/                  # one structured notebook per chapter
+│   │   ├── _template.md            # reusable chapter template
+│   │   └── ch01_what_is_ml.md
+│   ├── flashcards/                 # spaced-review decks  (ch01_cards.md …)
+│   ├── questions/                  # Test 1 knowledge Q&A + evaluation
+│   ├── interview/                  # interview translation per chapter
+│   └── scorecards/                 # per-chapter evaluation (7 areas, 1–10)
+├── src/                            # runnable code (exercises + from-scratch ML)
 │   ├── __init__.py
 │   └── ch01_framework.py
-├── pyproject.toml        # project + dependency declarations
-├── uv.lock               # exact resolved versions (commit this)
-├── .python-version       # pins Python 3.12 for uv
-├── .env.example          # template for API keys (copy → .env)
-├── .gitignore
+├── capstone/                       # fraud-detection system (grows each chapter)
+│   ├── README.md                   # problem statement + architecture
+│   └── data_contract.md            # transaction schema (Ch 1 artifact)
+├── pyproject.toml / uv.lock / .python-version   # uv environment
+├── .env.example / .gitignore
 ├── README.md
-└── SETUP.md              # step-by-step environment setup
+└── SETUP.md
 ```
+
+> **Note:** the *Grokking* book PDFs are **not** in this repo. They're copyrighted; we study them
+> locally only. `.gitignore` blocks `*.pdf` and `books-to-read/` so they can never be committed.
