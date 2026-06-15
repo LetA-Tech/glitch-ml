@@ -88,6 +88,63 @@ flowchart LR
 
 ---
 
+## 5b. Deep dive — the THRESHOLD (the simplest thing a model learns)
+
+> Code: `src/ch01/ch01_threshold_lesson.py` (analogy + ASCII picture) and the sweep exercise.
+
+**What a threshold is.** A dividing line on a single number with a rule: *below the line → guess NO, above → guess YES.* Analogies: the amusement-park height bar ("you must be THIS tall"), a fever cutoff (38.0°C), an exam pass mark (≥50). In our model the feature is `amount` and the threshold is a dollar fence: `amount > threshold → fraud`.
+
+**How our toy "learns" it.** One line: `threshold = (mean(fraud) + mean(legit)) / 2` — the **midpoint between the two crowd-centers**. Legit center ≈ $295, fraud center ≈ $920 → fence ≈ $607. The number came from the data, not from me.
+
+**Why it's not perfect — the overlap.** The two crowds overlap in ~$300–600 (big honest purchases vs small fraud test-charges). Anything in the overlap lands on the wrong side and is misclassified. That overlap is *why* accuracy was ~0.90, not 1.00. No single straight fence separates overlapping clouds — motivation for smarter models later.
+
+**The sweep insight (my exercise).** I swept the fence from $0→$1500 and computed accuracy at each spot. The curve is low at both extremes (fence at $0 calls everything fraud → 0.39; fence at $1500 calls everything legit → 0.61), **peaks at $600 → 0.900**, then falls. Found the best automatically with `max(range(0,1501,50), key=lambda th: accuracy_at(th, data))`.
+
+**The big lesson.** The midpoint shortcut ($607) landed essentially ON the searched optimum ($600) — but that's **luck of a balanced, symmetric dataset**. With real-world ~1% fraud, the shortcut drifts far from the optimum. My hand-sweep *is* a brute-force search; `learn_threshold` only takes a one-step shortcut. **The thing that should search for the best parameter automatically is the training / optimization step (gradient descent, Chapter 3).** Guessing-in-one-step vs searching-toward-the-best is the door into Ch 3.
+
+```mermaid
+flowchart LR
+    A[Sweep every fence position] --> B[Accuracy peaks at one spot]
+    B --> C[Best threshold ~ $600]
+    C --> D[Real training does this search<br/>automatically + efficiently = Ch 3]
+```
+
+---
+
+## 5c. Deep dive — does a SECOND feature help? (the experiment that overturned the easy story)
+
+> Code: `src/ch01/ch01_stretch_two_features.py`. Added `is_new_account`, combined with `amount` via AND then OR, on a NOISE dataset (account flag random) and a SIGNAL dataset (new accounts genuinely riskier, with some low-amount fraud).
+
+**Results (FP = false alarm, FN = missed fraud):**
+
+| dataset | amount-only | AND | OR |
+|---|---|---|---|
+| noise | **0.902** (FP0/FN39) | 0.745 (FP0/FN102) | 0.652 (FP118/FN21) |
+| signal | **0.910** (FP1/FN35) | 0.772 (FP0/FN91) | 0.755 (FP95/**FN3**) |
+
+**Surprise:** neither AND nor OR beat amount-only on plain accuracy — even on the signal data. The instructor expected the second feature to help; the experiment proved it's not that simple.
+
+**Mechanism:**
+- **AND is stricter** → requires both clues → throws away high-amount fraud on established accounts → missed fraud jumped (FN 39→102). Fewer fraud predictions: FP↓, FN↑.
+- **OR is looser** → flags every new account → floods false alarms (FP→118 on noise). More fraud predictions: FN↓, FP↑.
+- **The signal IS real and usable:** OR on the signal data cut missed fraud to **3** — it caught the sneaky low-amount new-account fraud the amount fence was blind to. But the blunt OR also over-flagged legit new accounts (FP 95), so accuracy still looked worse.
+
+**Lessons (gold):**
+1. A signal feature is **necessary but not sufficient** — *how* you combine features matters as much as whether they carry signal.
+2. **AND = stricter (FP↓, FN↑); OR = looser (FN↓, FP↑).**
+3. **Accuracy hides the trade-off.** The OR-signal model has lower accuracy (0.755) but misses only 3 frauds — in payments, where a missed fraud costs far more than a false alarm, that "worse" model might be the one to ship. → seed of **Ch 7 (precision/recall/cost)**.
+4. To extract value from a weak feature you need a **learned weighting/conditioning**, not boolean glue → motivates **logistic regression (Ch 6)**, **decision trees (Ch 9)**, **ensembles (Ch 12)**.
+
+```mermaid
+flowchart TD
+    A[amount fence misses<br/>low-amount fraud] --> B{combine with is_new_account}
+    B -->|AND too strict| C[loses true catches<br/>FN up]
+    B -->|OR too loose| D[floods false alarms<br/>FP up]
+    B -->|learned weighting Ch6/9/12| E[keep catches + add new ones<br/>the real fix]
+```
+
+---
+
 ## 6. Q&A / discussion notes
 
 - **Q:** How is ML different from normal programming?
@@ -105,6 +162,8 @@ flowchart LR
 | Formulate = me stating a rule like "deposit > 1M" | Formulate = machine *learns* the rule from labeled data; output is a model | Confused human-written rules with machine-learned ones |
 | "predict any feature (label)" | Features (inputs) ≠ labels (answers); model maps features → label | Mixed the two terms |
 | Remember = "we see abnormal behavior" | Remember = store past transactions *with their true labels* | Missed that learning needs labels |
+| `accuracy = count(amount > threshold)/n` | Accuracy compares the prediction to the **label**: `(amount > threshold) == is_fraud` | Counted predictions-of-fraud, not *correct* predictions. Tell: it reported 1.0 for "flag everything" |
+| `learn_threshold` already "searches" for the best fence | It only takes a one-step shortcut (midpoint of means); real *searching* is the training/optimization step (gradient descent, Ch 3) | Conflated a cheap guess with true optimization |
 
 ---
 
@@ -116,6 +175,11 @@ flowchart LR
 4. **Q:** Feature vs label? **A:** Feature = input clue; label = answer to predict.
 5. **Q:** What is generalization and its failure mode? **A:** Doing well on unseen data; failure = overfitting (memorizing).
 6. **Q:** Fraud vs categorization — what's the difference in label shape? **A:** Binary vs multi-class.
+7. **Q:** What is a threshold (in a 1-feature classifier)? **A:** A dividing line on one number: below → guess NO, above → guess YES (e.g., `amount > $607 → fraud`).
+8. **Q:** Why can't a single threshold reach 100% accuracy here? **A:** The two classes *overlap*; points in the overlap fall on the wrong side of any single fence.
+9. **Q:** How do you write accuracy correctly? **A:** Fraction where prediction == label, e.g. `sum((amount>thr)==is_fraud)/n`.
+10. **Q:** Midpoint-of-means gave $607, brute-force search gave $600 — why so close, and is that reliable? **A:** Luck of balanced/symmetric data; with imbalance the shortcut drifts. Real training (gradient descent) does the search properly.
+11. **Q:** In one line, what is "training"? **A:** Automatically searching the parameter space for the values that make the model perform best.
 
 ---
 

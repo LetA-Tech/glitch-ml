@@ -53,3 +53,24 @@
 ---
 
 **Test 1 score: 9 / 10.** Strong conceptual grip; reaching ahead correctly. Tighten precision on feature-vs-label wording when explaining aloud.
+
+---
+
+## Threshold deep-dive — Q&A (self-requested, before Ch 2)
+
+**T1. What is a threshold?**
+- *Understanding reached:* A dividing line on one feature; `amount > threshold → fraud`. Analogies: height bar, fever cutoff, pass mark.
+
+**T2. Why isn't the toy model perfect?**
+- *Understanding reached:* The classes overlap (~$300–600); overlap points are misclassified by any single fence → accuracy ~0.90, not 1.00.
+
+**T3. Threshold-sweep exercise (coding).**
+- *Did:* wrote `accuracy_at`, swept $0–$1500, found best with `max(range(...), key=lambda th: accuracy_at(th, data))` → **$600 @ 0.900**.
+- *Bugs caught & fixed:* (a) `accuracy_at` defined *inside* `draw_picture` → `NameError`; moved to top level. (b) counted `amount > threshold` instead of correctness; added `== x.is_fraud`. (Tell: reported 1.0 for "flag everything".)
+- *Eval:* ✅ Both bugs fixed independently; clean idiomatic `max(..., key=...)`.
+
+**T4. What should do the fence-search automatically?**
+- *My answer:* "the train function does it" → *refined:* the **training / optimization** step (gradient descent, Ch 3). Our `learn_threshold` only shortcuts; it doesn't truly search.
+- *Eval:* ✅ Right concept; sharpened the vocabulary and the guess-vs-search distinction.
+
+**Insight earned:** midpoint shortcut ($607) ≈ searched optimum ($600) here *only* because the data is balanced/symmetric; with real-world imbalance it would drift — which is why real optimization matters.

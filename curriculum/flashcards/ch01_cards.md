@@ -43,3 +43,27 @@ A: A **labeled dataset** (and a data contract defining the rows) — no labels, 
 **Card 10** *(reach-ahead)*
 Q: Why can 99.9% accuracy be a bad sign on fraud data?
 A: Two reasons — (1) it may be **overfitting** (test on unseen data); (2) with ~0.1% fraud, a model that always says "not fraud" is 99.9% accurate and useless = the **class imbalance** trap (Ch 7).
+
+---
+
+## Threshold deep-dive cards
+
+**Card 11**
+Q: What is a threshold in a one-feature classifier?
+A: A dividing line on a single number — below → guess NO, above → guess YES (e.g., `amount > $607 → fraud`).
+
+**Card 12**
+Q: How does our toy model "learn" its threshold, and is that real searching?
+A: `(mean(fraud) + mean(legit)) / 2` — the midpoint of the two crowd-centers. It's a one-step shortcut, NOT a search.
+
+**Card 13**
+Q: Why can't one straight threshold be 100% accurate on our data?
+A: The classes **overlap**; points in the overlap zone sit on the wrong side of any single fence.
+
+**Card 14**
+Q: Correct one-line accuracy?
+A: Fraction where prediction matches label: `sum((x.amount > thr) == x.is_fraud for x in data) / len(data)`.
+
+**Card 15**
+Q: What should perform the search for the best parameter automatically?
+A: The **training / optimization** step — gradient descent (Chapter 3). "Training = automatically searching for the parameters that perform best."

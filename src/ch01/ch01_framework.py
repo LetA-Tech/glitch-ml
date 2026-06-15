@@ -6,7 +6,6 @@ Goal of this script: FEEL the differences between traditional programming and ma
 """
 
 from dataclasses import dataclass
-from fnmatch import filterfalse
 from statistics import mean
 
 
