@@ -135,6 +135,10 @@ flowchart TD
 - How I'd use it to build/improve/scale that surface:
 - Design tension it creates (e.g., precision vs trust, personalization vs privacy):
 
+### 13b. Physical AI bridge (North Star)
+- How this idea reappears in embodied/robotic systems (perception, state estimation, control, planning):
+- (e.g., classifier → obstacle detection · gradient descent → training a control policy · Bayes → sensor fusion · reward → RL control)
+
 ---
 
 ## 14. Capstone progress this chapter

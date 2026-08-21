@@ -1,18 +1,18 @@
 # Product Context — Mellions (Personal Financial Management)
 
-> This file is a standing reference. Every chapter, I connect the ML/DE concept we learn
-> to a real surface of Mellions. Interview prep is a *byproduct* of real mastery, not the goal.
-> The goal: become capable of building, explaining, improving, and scaling real AI/DE products.
+> Standing reference. Mellions is the **applied grounding** for concepts today; the **North Star**
+> is Physical AI (see `north_star_physical_ai.md`). We learn for deep mastery and love of the field
+> — interview skill is just a byproduct.
 
 ---
 
-## The three learning layers (apply to EVERY concept)
+## The three learning layers (mastery-first — apply to EVERY concept)
 
-1. **Interview readiness** — explain the concept clearly; answer technical follow-ups.
-2. **Real technical mastery** — implement it, test it, break it, understand the math and trade-offs.
-3. **Product application** — connect it to real systems, especially **Mellions** and PFM broadly.
+1. **Deep technical mastery** — implement it, test it, break it, understand the math and trade-offs. The core.
+2. **Systems & real-world grounding** — connect it to real systems: **Mellions** (PFM) + the fraud capstone today, and the **Physical AI bridge** (robotics/perception/control) when relevant.
+3. **Clear explanation** — teach it simply in your own words (also makes interviews easy — a byproduct).
 
-When teaching any concept, I cover all three. If a concept has no honest product tie-in, I say so rather than forcing one.
+When teaching any concept, I cover mastery first, then grounding, then explanation. If a concept has no honest product/physical tie-in, I say so rather than forcing one.
 
 ---
 

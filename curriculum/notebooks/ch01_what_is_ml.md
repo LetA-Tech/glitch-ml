@@ -124,6 +124,12 @@ flowchart LR
 
 **Surprise:** neither AND nor OR beat amount-only on plain accuracy — even on the signal data. The instructor expected the second feature to help; the experiment proved it's not that simple.
 
+**Analogy that made it click — the bank security guard.** A transaction = a person entering; `is_fraud` = actually a thief; predict-fraud = the guard stops & searches them; feature `amount` = bag size; feature `is_new_account` = unfamiliar face. Then **false alarm (FP)** = stopped an innocent shopper, **missed fraud (FN)** = let a thief walk through.
+- *amount-only:* stop big bags — rarely bothers innocents (FP≈0), misses small-bag thieves (FN).
+- *AND (big bag **and** unfamiliar):* a second *required* hurdle → guard stops fewer people → waves through big-bag thieves who are regulars → **missed thieves jump** (39→102). Stricter.
+- *OR (big bag **or** unfamiliar):* either flag triggers a stop → guard stops more → catches small-bag newcomer thieves (FN→3 on signal) → but pounces on innocent newcomers (FP explodes). Looser.
+- *Noise vs signal:* if "unfamiliar face" is random it's useless; if unfamiliar faces really are thieves more often (signal), OR's extra stops are justified — but a blunt boolean still over-stops. **Accuracy counts an annoyed shopper = an escaped thief; reality doesn't** → Ch 7.
+
 **Mechanism:**
 - **AND is stricter** → requires both clues → throws away high-amount fraud on established accounts → missed fraud jumped (FN 39→102). Fewer fraud predictions: FP↓, FN↑.
 - **OR is looser** → flags every new account → floods false alarms (FP→118 on noise). More fraud predictions: FN↓, FP↑.
@@ -215,6 +221,11 @@ flowchart TD
 - **Surface:** Transaction categorization (and spending-anomaly insights).
 - **Use:** Learn merchant/location/counterparty → category from past user-confirmed categorizations; generalize to unseen merchants.
 - **Tension:** Label noise (Walmart = grocery? electronics?) caps accuracy; mis-categorization is a visible trust hit. Precision matters more than raw accuracy.
+
+### 13b. Physical AI bridge (North Star)
+- **Same idea, embodied:** the threshold classifier (`amount > line → fraud`) is exactly an **obstacle detector** (`sensor reading > line → obstacle`). A robot deciding "stop or go" *is* a binary classifier.
+- **Training-as-search → control:** the "find the best fence" search previews how a robot's **control policy** is trained (gradient descent, Ch 3) — discovering the parameters that produce the best action, not hand-coding them.
+- **FP/FN cost asymmetry → safety:** "missed fraud vs false alarm" becomes "missed obstacle (crash) vs phantom brake" — in robotics the cost asymmetry is literally safety-critical.
 
 ---
 

@@ -37,13 +37,13 @@ We anchor on **Grokking Machine Learning** and pull in the others as just-in-tim
 
 **Rule:** We do not advance until you can *apply* the chapter, not just recall it.
 
-### Every concept is taught in three layers
+### Every concept is taught in three layers (mastery-first)
 
-1. **Interview readiness** — explain it clearly, handle follow-ups.
-2. **Real technical mastery** — implement, test, break, understand the math & trade-offs.
-3. **Product application** — connect it to real systems, especially **Mellions** (our PFM product) and the fraud capstone. See `PRODUCT_CONTEXT_Mellions.md`.
+1. **Deep technical mastery** — implement it, test it, break it, understand the math & trade-offs. This is the core.
+2. **Systems & real-world grounding** — how the idea is used in real systems: today **Mellions** (PFM) + the fraud capstone; tomorrow **Physical AI** (robotics, perception, control). See `north_star_physical_ai.md` and `product_context_mellions.md`.
+3. **Clear explanation** — be able to teach the idea simply, in your own words. (A mastery skill that *also* makes interviews trivial — a byproduct, never the goal.)
 
-> The goal is not to pass one interview. It's to become capable of building, explaining, improving, and scaling real AI/DE products. Interview skill is a byproduct of that.
+> **North Star:** build deep, durable foundations in ML, AI, and Data Engineering, then move into **Physical AI** (embodied / robotic systems). We learn for love of the field and real capability — not to pass a test.
 
 ---
 
