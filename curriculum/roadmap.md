@@ -7,7 +7,7 @@
 
 ---
 
-## The book stack (in `/ML/books-to-read/`)
+## The book stack (in `~/ebook-library/` — see its INDEX.md for the full curated catalog)
 
 We anchor on **Grokking Machine Learning** and pull in the others as just-in-time support so you build *system* knowledge, not just model knowledge.
 
@@ -85,23 +85,14 @@ Even though the book is ML-first, each chapter we attach a DE concept so the cap
 
 ## Folder structure
 
-```
-AI-DataEng-Learning/
-├── README_Roadmap.md        ← this file
-├── notebooks/               ← chXX_title.md (concepts, notes, Mermaid diagrams)
-│   └── _TEMPLATE.md         ← reusable chapter template
-├── code/                    ← chXX_title.py (exercises + capstone code)
-├── capstone/                ← fraud detection system (grows each chapter)
-│   └── README.md            ← problem statement + architecture
-└── flashcards/              ← chXX_cards.md (spaced-review questions)
-```
+Current structure lives in the top-level [README.md](../README.md) ("Project layout") — this
+file described an older layout (`AI-DataEng-Learning/`, `code/`, top-level `flashcards/`) that
+no longer matches the repo and has been retired here to avoid two sources of truth.
 
 ---
 
-## Progress tracker
+## Progress
 
-| Ch | Concepts | Coding | Explain | Interview | Real-world link | Capstone | Notebook | Status |
-|----|----------|--------|---------|-----------|-----------------|----------|----------|--------|
-| 1  | – | – | – | – | – | – | – | In progress |
-
-(Scores filled in 1–10 as we complete each chapter.)
+Tracked in [`tracker/progress.md`](../tracker/progress.md) and
+[`tracker/learning-state.md`](../tracker/learning-state.md) — not duplicated here, per this
+repo's own clean-repo rule (one idea, one home; `tracker/` is the only authoritative state).

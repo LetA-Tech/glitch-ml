@@ -1,8 +1,9 @@
 # Session Kickoff — paste this to start a fresh learning session
 
-> **How to use:** open a new Cowork session, make sure the **`~/ML`** folder is connected
-> (it holds the `glitch-ml` repo + `books-to-read/`), then paste everything in the block below.
-> The new session rehydrates from the curriculum docs, so no context is lost.
+> **How to use:** open a new Cowork session, make sure the **`~/Lucas-Machine-Learning-Space`**
+> folder is connected (it holds the `glitch-ml` repo) and `~/ebook-library/` is reachable for
+> book material, then paste everything in the block below. The new session rehydrates from the
+> curriculum docs, so no context is lost.
 
 ---
 
@@ -13,21 +14,25 @@ established roadmap and I want to CONTINUE it — do NOT restart, re-teach finis
 material, or lose continuity.
 
 STEP 0 — REHYDRATE (do this first, before anything else):
-Read these files in my connected ~/ML folder to load our full context, then give me a
-5-line recap of where we are:
-- ~/ML/glitch-ml/curriculum/roadmap.md            (the plan + how we work)
-- ~/ML/glitch-ml/curriculum/north_star_physical_ai.md  (why I learn: Physical AI + my companion-robot dream)
-- ~/ML/glitch-ml/curriculum/product_context_mellions.md (product lens: Mellions PFM)
-- ~/ML/glitch-ml/curriculum/analogies.md          (the analogies that work for me)
-- ~/ML/glitch-ml/curriculum/notebooks/            (_template.md + ch01, ch02 — my notebooks)
-- ~/ML/glitch-ml/curriculum/scorecards/           (my evaluations)
-- ~/ML/glitch-ml/curriculum/questions/ , flashcards/ , interview/
-- ~/ML/glitch-ml/capstone/                        (README.md, data_contract.md, label_strategy.md)
-Books (LOCAL ONLY — learn from, never copy/redistribute/commit): ~/ML/books-to-read/*.pdf
+Read these files to load our full context, then give me a 5-line recap of where we are:
+- glitch-ml/curriculum/roadmap.md            (the plan + how we work)
+- glitch-ml/curriculum/north_star_physical_ai.md  (why I learn: Physical AI + my companion-robot dream)
+- glitch-ml/curriculum/product_context_mellions.md (product lens: Mellions PFM)
+- glitch-ml/curriculum/analogies.md          (the analogies that work for me)
+- glitch-ml/curriculum/notebooks/            (_template.md + ch01, ch02 — my notebooks)
+- glitch-ml/curriculum/scorecards/           (my evaluations)
+- glitch-ml/curriculum/questions/ , flashcards/ , interview/
+- glitch-ml/capstone/                        (README.md, data_contract.md, label_strategy.md)
+- glitch-ml/tracker/                         (authoritative status across all 3 tracks below)
+- glitch-ml/ray-learning/                    (the 20-day Spark/Ray/DE intensive — separate env, own README)
+Books (LOCAL ONLY — learn from, never copy/redistribute/commit): `~/ebook-library/` — see its
+INDEX.md for the full curated catalog (241 books, 16 categories).
 Anchor book: "Grokking Machine Learning" (Luis Serrano). Support books: Grokking Bayes,
 Grokking Data Structures, Grokking Algorithms, Grokking AI Algorithms (2nd Ed).
-NOTE: the canonical workspace is the `glitch-ml` repo (GitHub: letainc/glitch-ml). Ignore any
-older `~/ML/AI-DataEng-Learning/` duplicate.
+NOTE: the canonical workspace is the `glitch-ml` repo. glitch-de (sibling repo) purpose is an
+open question as of 2026-08-31 — confirm before assuming it's a dead duplicate.
+DEADLINE: preparing for a Senior AI and Data Engineer role at SAP starting ~2026-10-05. All
+three tracks below now run in parallel, not sequentially — see tracker/progress.md.
 
 WHO I AM / WHY:
 I learn for love of the field and deep, durable foundations — NOT to pass interviews.
@@ -73,12 +78,12 @@ WHERE WE ARE (continuity — resume here, do NOT redo):
   If I've already done it, review my code, finalize the Chapter 2 scorecard, then start Chapter 3
   "Linear Regression" (the gradient-descent engine the whole capstone will reuse).
 
-NEW EMPHASIS FOR THIS SECTION:
-Deepen DATA SCIENCE & DATA ENGINEERING alongside the ML anchor. Keep progressing the Grokking ML
-chapters, but intensify the DE/DS practice as we go — SQL, ETL/pipelines, data quality, EDA,
-statistics, visualization, warehousing, streaming, orchestration — always tied to the fraud
-capstone and Mellions. (If I ask, we can also open a dedicated DE/DS sub-track with its own
-roadmap, using Grokking Data Structures / Algorithms and real tools.)
+NEW EMPHASIS FOR THIS SECTION (superseded 2026-08-31 — see tracker/progress.md):
+The hypothetical "dedicated DE/DS sub-track" below is now real: `ray-learning/` — a scoped
+20-day Python/Spark/Ray/distributed-ML intensive, window 2026-09-01 to 2026-09-20, running in
+parallel with this Grokking ML track, not sequentially. Deepen DATA SCIENCE & DATA ENGINEERING
+alongside the ML anchor — SQL, ETL/pipelines, data quality, EDA, statistics, visualization,
+warehousing, streaming, orchestration — always tied to the fraud capstone and Mellions.
 
 START NOW: rehydrate (Step 0), give me the 5-line recap, confirm the plan, then resume at the
 NEXT ACTION above.
