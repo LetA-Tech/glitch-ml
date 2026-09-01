@@ -1,0 +1,24 @@
+[project]
+name = "glitch-ml-ray-learning"
+version = "0.1.0"
+requires-python = ">=3.12,<3.14"
+dependencies = [
+  "numpy>=2.0",
+  "pandas>=2.2",
+  "pyarrow>=18",
+  "scikit-learn>=1.6",
+  "pyspark>=4.0,<5",
+  "ray[default,data,train,tune,serve]>=2.50,<3",
+  "torch>=2.6",
+  "optuna>=4",
+  "pytest>=8",
+  "psutil>=6",
+  "memory-profiler>=0.61",
+]
+
+[tool.pytest.ini_options]
+addopts = "-q"
+testpaths = ["exercises", "labs", "projects"]
+
+[tool.uv]
+package = false
