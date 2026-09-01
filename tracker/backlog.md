@@ -9,8 +9,12 @@
 2. Finalize Ch2 scorecard, then start Ch3 "Linear Regression."
 
 ## Next up — Track B (ray-learning)
-1. `cd ray-learning && make data` — generate the synthetic dataset.
-2. Day 01 (2026-09-01): Python execution model for DE. Move the matching Linear issue to In Progress.
+1. Day 01 (2026-09-01): Python execution model for DE — streaming transaction normalizer. Move the matching Linear issue to In Progress.
+2. Day 02 (2026-09-02): parallelism, serialization, profiling.
+
+> Dataset generated 2026-09-01: 500k rows, seed 42, fraud_rate_observed 0.007488, at
+> `ray-learning/datasets/generated`. Run from repo root as `make -f ray-learning/Makefile data`
+> — `cd ray-learning && make data` (the old form here) double-prefixes the path and fails.
 
 ## Next up — Track C (Senior-DE competency ladder)
 1. **Session 0 — Calibration & setup** (parked — resume in the 2026-09-21 → 2026-10-05 window):

@@ -55,8 +55,16 @@
 - _(none yet)_
 
 ## Current focus
-- **Immediate (today, 2026-08-31):** Grokking ML Ch2 Test 2 — `src/ch02/ch02_imbalance.py`
-  (accuracy-paradox exercise on imbalanced fraud data). See `sessions/` for continuity detail.
-- **Tomorrow (2026-09-01):** ray-learning Day 01 starts (Python execution model for DE).
+- **Immediate (today, 2026-09-01):** two blocks, per Lucas's AM/PM structure —
+  AM: ray-learning Day 01 (Python execution model for DE, streaming transaction normalizer).
+  PM: Grokking ML Ch2 Test 2 — `src/ch02/ch02_imbalance.py` (accuracy-paradox exercise on
+  imbalanced fraud data, still open from 2026-08-31).
+- **Standing decision (2026-09-01):** distributed-systems fundamentals (architecture,
+  execution model, scheduling, fault tolerance, data movement, scaling) run as a companion
+  read — Kleppmann's *Designing Data-Intensive Applications* (in `~/ebook-library/`) — layered
+  into ray-learning's own reading slots on the days it's most relevant (Day03-06 Spark,
+  Day09-13 Ray architecture/objects/fault-tolerance) rather than a new 7th daily block. Keeps
+  Day01-02's Python-only reading cap intact per `ray-learning/references/reading-map.md`'s
+  own scope discipline.
 - **Parked:** M0/Session-0 DE-ladder calibration (see `tracker/backlog.md`) — resume in the
   2026-09-21 → 2026-10-05 window pending the open questions above.
