@@ -248,7 +248,15 @@ ray.shutdown()
 
 Should print a dict with your machine's CPU count and available memory — confirms Ray can actually start a local cluster (head process, GCS, object store, at least one raylet) before you build anything on top of it.
 
-**Important check — first real task run can be much slower than it looks like it should be.** If you run Ray from inside a directory that has its own `pyproject.toml` (like `ray-learning/`), Ray auto-packages that working directory and ships it to every worker process, and each worker may rebuild its own environment before running your first task — first-run overhead that has nothing to do with your code. We're actively working through the exact mechanism and the fix live in this session; full writeup lands here once that's resolved rather than pre-empting it.
+**Important check — verified 2026-09-01: launching the driver via `uv run` makes every Ray worker rebuild its own venv.** `uv run python -c "..."` inside `ray-learning/` triggers Ray's `uv`-integration: it detects the driver was launched through `uv run` and re-invokes `uv run` (fresh venv + all 102 packages) for **every worker process** before that worker runs your first task. Measured: 20 trivial 10ms tasks took **8.7-10s** this way. Same code, driver launched via an activated venv instead (`source .venv/bin/activate && python -c "..."`, no `uv run` wrapper) — **0.33s**. `ray.init(runtime_env={})` does NOT fix it (tested, still slow) — the trigger is the `uv run`-launched driver itself, not `runtime_env.working_dir` packaging.
+
+**Fix:** for anything perf-sensitive, activate the venv and run plain `python`, don't wrap the driver in `uv run`:
+```bash
+source .venv/bin/activate
+python your_script.py
+deactivate
+```
+`uv run` is still fine for one-off exploratory commands where a few extra seconds don't matter.
 
 ## Everyday usage
 
@@ -267,6 +275,6 @@ uv sync                                 # rebuild env to match ray-learning/uv.l
 |---------|-----|
 | `make data` fails / paths look doubled | Run it from the repo root as `make -f ray-learning/Makefile data`, not from inside `ray-learning/`. |
 | `.venv` in `ray-learning/` looks empty after `uv run` (but imports still work) | Some `uv run` invocations resolve without fully materializing `.venv` on disk. Run `uv sync` explicitly to force a real, persistent `.venv/bin/python`. |
-| First Ray task run is unexpectedly slow | See Step 5's important check above — likely per-worker environment setup, not your code. Still being diagnosed live; ask before assuming it's a real bug in your implementation. |
+| First Ray task run is unexpectedly slow (multi-second for trivial tasks) | You launched the driver with `uv run`. Activate the venv and run plain `python` instead — see Step 5's important check above. |
 | Want a clean rebuild | `rm -rf ray-learning/.venv && cd ray-learning && uv sync`. |
 | Dependency conflict after `uv add` | `cd ray-learning && uv lock --upgrade && uv sync`. |

@@ -156,7 +156,9 @@ This is how you get a shared counter, cache, connection pool, or rate limiter ac
 
 5. **Sharing mutable global state across tasks via closures/globals.** Each task may run in a different process (even on a different machine) — a global variable mutated by one task is invisible to another. Use `ray.put`/actor state to share data, not Python globals.
 
-6. **First-run confusion: a slow "parallel" run that's actually dominated by environment/dependency packaging, not your code.** If a `ray.init()` call has to build/ship a `runtime_env` (e.g. a project's virtualenv) to every worker, that setup cost happens once per worker *before* your function ever runs, and can dwarf trivial workloads on a first run. This is a real, distinct failure mode from task-granularity overhead — see [Day 11](day11_object_store_data_movement.md) and [Day 17](../syllabus/20-day-intensive.md) debugging material for how to tell them apart from the logs.
+6. **First-run confusion: a slow "parallel" run that's actually dominated by environment/dependency packaging, not your code.** This is a real, distinct failure mode from task-granularity overhead — see [Day 11](day11_object_store_data_movement.md) and [Day 17](../syllabus/20-day-intensive.md) debugging material for how to tell them apart from the logs.
+
+   **Verified root cause and fix (2026-09-01):** launching the driver via `uv run python ...` makes Ray's `uv`-integration re-invoke `uv run` (fresh venv + full package install) for **every worker process**, not just once. Measured on this machine: 20 trivial 10ms tasks took 8.7-10s this way. Same code, driver launched via an activated venv instead (`source .venv/bin/activate && python ...`, no `uv run` wrapper) — 0.33s. `ray.init(runtime_env={})` does **not** fix it (tested) — the trigger is the `uv run`-launched driver itself, not `runtime_env.working_dir` packaging. Fix: activate the venv and run plain `python` for anything perf-sensitive; reserve `uv run` for one-off exploratory commands.
 
 ---
 
@@ -178,7 +180,7 @@ This is how you get a shared counter, cache, connection pool, or rate limiter ac
 | Symptom | Likely cause |
 |---|---|
 | "Parallel" run takes about as long as sequential | You're calling `ray.get()` inside the submission loop (§7.1) |
-| Huge wall-clock overhead relative to actual work, especially on first run | `runtime_env` / dependency packaging cost per worker, not your task logic (§7.6) |
+| Huge wall-clock overhead relative to actual work, especially on first run | Driver launched via `uv run` — every worker re-invokes it. Activate the venv, run plain `python` instead (§7.6) |
 | Task stuck in `PENDING_NODE_ASSIGNMENT` forever | Resource request infeasible on any node — see [Day 10](day10_architecture_scheduling.md) §9 |
 | `ObjectRef` argument seems to silently block everything until an unrelated task finishes | You've created an accidental dependency by passing a ref you didn't need yet — check what's actually feeding into that call |
 | Actor method calls appear to queue up / serialize | Expected default behavior — one actor, one call at a time (§4) |
