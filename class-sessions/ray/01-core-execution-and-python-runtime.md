@@ -215,6 +215,272 @@ repeat
 
 This is often superior to submitting millions of tasks immediately.
 
+### End-to-end DE example — bounded Parquet normalization
+
+Scenario: a daily ingestion job receives 10,000 Parquet files. Each file must be read, validated, normalized, and written to a clean zone. We want at most 20 outstanding Ray tasks at a time, we want to process whichever file finishes first, and we want one explicit state owner to track run statistics.
+
+The example deliberately uses all four Core concepts together:
+
+| Concept | Role |
+|---|---|
+| `@ray.remote` | Stateless file transformation |
+| Ray actor | Stateful run tracker |
+| `ray.wait()` | Sliding window / completion-order processing |
+| `ray.get()` | Materialize only a result that the driver actually needs |
+
+#### Flow
+
+```mermaid
+flowchart TD
+    D[Driver: 10,000-file manifest] --> I[Iterator of unsubmitted files]
+    I --> W[Sliding window: max 20 ObjectRefs]
+    W --> R1[Ray worker: process file A]
+    W --> R2[Ray worker: process file B]
+    W --> R3[Ray worker: process file C]
+    R1 --> O1[ObjectRef]
+    R2 --> O2[ObjectRef]
+    R3 --> O3[ObjectRef]
+    O1 --> WAIT[ray.wait: return whichever ref is ready]
+    O2 --> WAIT
+    O3 --> WAIT
+    WAIT --> GET[ray.get ready ref]
+    GET --> META[Small result metadata]
+    META --> A[RunTracker actor]
+    GET --> SLOT[One slot becomes free]
+    SLOT --> I
+    A --> FINAL[ray.get final summary at end]
+```
+
+This is a **sliding window**, not fixed batches of 20. If one task finishes, one replacement is submitted immediately; the other 19 do not need to finish first.
+
+```text
+initial:       1  2  3  ... 20
+7 finishes:   remove 7, submit 21
+3 finishes:   remove 3, submit 22
+18 finishes:  remove 18, submit 23
+...
+```
+
+#### Complete example
+
+```python
+import ray
+import pandas as pd
+from pathlib import Path
+
+ray.init()
+
+
+# ---------------------------------------------------------
+# 1. Stateful component: one explicit owner of run metrics
+# ---------------------------------------------------------
+
+@ray.remote
+class RunTracker:
+    def __init__(self):
+        self.files_succeeded = 0
+        self.files_failed = 0
+        self.rows_read = 0
+        self.rows_written = 0
+        self.bad_rows = 0
+        self.failures = []
+
+    def record_success(self, result):
+        self.files_succeeded += 1
+        self.rows_read += result["rows_read"]
+        self.rows_written += result["rows_written"]
+        self.bad_rows += result["bad_rows"]
+
+    def record_failure(self, path, error):
+        self.files_failed += 1
+        self.failures.append({
+            "path": path,
+            "error": error,
+        })
+
+    def summary(self):
+        return {
+            "files_succeeded": self.files_succeeded,
+            "files_failed": self.files_failed,
+            "rows_read": self.rows_read,
+            "rows_written": self.rows_written,
+            "bad_rows": self.bad_rows,
+            "failures": self.failures,
+        }
+
+
+# ---------------------------------------------------------
+# 2. Stateless distributed unit of work
+# ---------------------------------------------------------
+
+@ray.remote
+def process_file(input_path: str, output_dir: str):
+    input_path = Path(input_path)
+    output_dir = Path(output_dir)
+
+    # Extract
+    df = pd.read_parquet(input_path)
+    rows_read = len(df)
+
+    # Validate
+    required_columns = {
+        "event_id",
+        "user_id",
+        "event_time",
+        "amount",
+    }
+
+    missing = required_columns - set(df.columns)
+    if missing:
+        raise ValueError(f"{input_path}: missing columns {missing}")
+
+    # Transform
+    valid = (
+        df["event_id"].notna()
+        & df["user_id"].notna()
+        & df["event_time"].notna()
+        & (df["amount"] >= 0)
+    )
+
+    clean_df = df[valid].copy()
+    clean_df["event_date"] = pd.to_datetime(
+        clean_df["event_time"]
+    ).dt.date
+
+    rows_written = len(clean_df)
+    bad_rows = rows_read - rows_written
+
+    # Load
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_path = output_dir / input_path.name
+    clean_df.to_parquet(output_path, index=False)
+
+    # Return small metadata instead of the whole DataFrame.
+    return {
+        "input_path": str(input_path),
+        "output_path": str(output_path),
+        "rows_read": rows_read,
+        "rows_written": rows_written,
+        "bad_rows": bad_rows,
+    }
+
+
+# ---------------------------------------------------------
+# 3. Driver control loop
+# ---------------------------------------------------------
+
+files = [
+    f"/data/raw/part-{i:05d}.parquet"
+    for i in range(10_000)
+]
+
+output_dir = "/data/clean"
+MAX_IN_FLIGHT = 20
+
+tracker = RunTracker.remote()
+file_iter = iter(files)
+
+# Map ObjectRef -> source path so failures remain attributable.
+in_flight = {}
+
+# Seed only the first 20 tasks.
+for _ in range(MAX_IN_FLIGHT):
+    try:
+        path = next(file_iter)
+    except StopIteration:
+        break
+
+    ref = process_file.remote(path, output_dir)
+    in_flight[ref] = path
+
+
+# Maintain a sliding window until all input is exhausted and
+# every outstanding task has completed.
+while in_flight:
+    ready_refs, _ = ray.wait(
+        list(in_flight.keys()),
+        num_returns=1,
+    )
+
+    ready_ref = ready_refs[0]
+    path = in_flight.pop(ready_ref)
+
+    try:
+        # The task is already ready. Materialize only its small metadata.
+        result = ray.get(ready_ref)
+
+        # Actor update is asynchronous; the driver does not need to wait.
+        tracker.record_success.remote(result)
+
+    except Exception as exc:
+        tracker.record_failure.remote(path, str(exc))
+
+    # Exactly one slot became free, so submit exactly one replacement.
+    try:
+        next_path = next(file_iter)
+        new_ref = process_file.remote(next_path, output_dir)
+        in_flight[new_ref] = next_path
+    except StopIteration:
+        pass
+
+
+# The actor has received all updates from this driver.
+# Now the driver genuinely needs one concrete final value.
+summary = ray.get(tracker.summary.remote())
+print(summary)
+```
+
+#### What each primitive means in this pipeline
+
+```text
+process_file.remote(path)
+    -> submit distributed work
+    -> receive ObjectRef immediately
+
+ray.wait(in_flight, num_returns=1)
+    -> tell the driver which submitted work is ready
+    -> do not wait for every task
+
+ray.get(ready_ref)
+    -> materialize that one completed result in the driver
+
+tracker.record_success.remote(result)
+    -> send a state update to the actor
+    -> no driver-side wait required
+
+ray.get(tracker.summary.remote())
+    -> materialize final actor state because the driver now needs it
+```
+
+#### Why this is not batch processing in groups of 20
+
+A fixed batch would do this:
+
+```text
+submit 1..20
+wait for ALL 20
+submit 21..40
+wait for ALL 20
+```
+
+One slow file would hold the next batch hostage.
+
+The sliding-window design does this:
+
+```text
+submit 1..20
+one finishes -> submit 21
+one finishes -> submit 22
+one finishes -> submit 23
+...
+```
+
+The window controls **outstanding work**, while Ray's scheduler independently controls how many tasks are actually executing based on available resources.
+
+#### Production caveat
+
+The example writes output from a task that may be retried. A production sink therefore needs idempotent or transactional commit semantics: for example deterministic output keys, write-to-temp then atomic rename/commit, or a sink-specific transaction/idempotency token. `ray.wait` controls flow; it does not provide exactly-once side effects.
+
 ---
 
 ## 7. Task granularity
